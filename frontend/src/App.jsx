@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import SummaryApi from './common/SummaryApi';
 import AxiosToastError from './utils/AxiosToastError';
 import Axios from './utils/Axios';
-import { setAllCategory, setAllSubCategory } from './store/productSlice';
+import { setAllCategory, setAllSubCategory, setLoadingCategory } from './store/productSlice';
 function App() {
   const dispatch = useDispatch()
   const fetchUser =async()=>{
@@ -22,22 +22,22 @@ function App() {
 
 
   const fetchCategory = async()=>{
-        try {
-            const response = await Axios({
-                ...SummaryApi.getCategory
-            })
-            const { data : responseData } = response
-  
-            if(responseData.success){
-               dispatch(setAllCategory(responseData.data))
-            }
-        } catch (error) {
-          AxiosToastError(error)
-            
-        }finally{
-            // setLoading(false)
+    try {
+        dispatch(setLoadingCategory(true))
+        const response = await Axios({
+            ...SummaryApi.getCategory
+        })
+        const { data : responseData } = response
+
+        if(responseData.success){
+           dispatch(setAllCategory(responseData.data.sort((a, b) => a.name.localeCompare(b.name)))) 
         }
-      }
+    } catch (error) {
+        console.log(error)
+    }finally{
+      dispatch(setLoadingCategory(false))
+    }
+  }
       const fetchSubCategory = async()=>{
         try {
             const response = await Axios({
