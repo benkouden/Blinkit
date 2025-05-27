@@ -1,0 +1,208 @@
+<div class="product-slider-container">
+  <div class="product-slider">
+    <!-- Les produits seront injectés ici par JavaScript -->
+  </div>
+  <button class="slider-nav prev">‹</button>
+  <button class="slider-nav next">›</button>
+</div>
+
+<style>
+  .product-slider-container {
+    position: relative;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+  
+  .product-slider {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 20px 0;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .product-slider::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .product-card {
+    flex: 0 0 calc(33.333% - 20px);
+    min-width: 250px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    background: white;
+  }
+  
+  .product-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .product-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
+  
+  .product-info {
+    padding: 15px;
+  }
+  
+  .product-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .product-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2ecc71;
+    margin: 0;
+  }
+  
+  .slider-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    cursor: pointer;
+    font-size: 20px;
+    z-index: 10;
+  }
+  
+  .slider-nav.prev {
+    left: 0;
+  }
+  
+  .slider-nav.next {
+    right: 0;
+  }
+  
+  @media (max-width: 768px) {
+    .product-card {
+      flex: 0 0 calc(50% - 15px);
+      min-width: 200px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .product-card {
+      flex: 0 0 100%;
+    }
+    
+    .product-slider-container {
+      padding: 0 30px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const slider = document.querySelector('.product-slider');
+    const prevBtn = document.querySelector('.prev');
+    const nextBtn = document.querySelector('.next');
+    let autoScrollInterval;
+    
+    // Charger les produits
+    async function loadProducts() {
+      try {
+        const response = await fetch('https://cors-anywhere.herokuapp.com/https://blinkit-plum.vercel.app/api/product/get', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            page: 1,
+            limit: 10,
+            search: ""
+          })
+        });
+
+        const result = await response.json();
+        const products = result.data || [];
+        
+        if (products.length === 0) {
+          slider.innerHTML = '<p class="no-products">Aucun produit disponible</p>';
+          return;
+        }
+
+        products.forEach(product => {
+          const productCard = document.createElement('div');
+          productCard.className = 'product-card';
+          
+          const image = product.image?.[0] || "https://via.placeholder.com/300x180?text=No+Image";
+          const name = product.name || "Nom non disponible";
+          const price = product.price ? `${product.price} FCFA` : "Prix non disponible";
+          
+          productCard.innerHTML = `
+            <img src="${image}" alt="${name}" class="product-image" />
+            <div class="product-info">
+              <h3 class="product-name">${name}</h3>
+              <p class="product-price">${price}</p>
+            </div>
+          `;
+          
+          slider.appendChild(productCard);
+        });
+
+        // Démarrer le défilement automatique
+        startAutoScroll();
+        
+      } catch (error) {
+        console.error("Erreur lors du chargement des produits:", error);
+        slider.innerHTML = '<p class="error-message">Erreur de chargement des produits</p>';
+      }
+    }
+    
+    // Navigation manuelle
+    prevBtn.addEventListener('click', () => {
+      resetAutoScroll();
+      slider.scrollBy({ left: -300, behavior: 'smooth' });
+    });
+    
+    nextBtn.addEventListener('click', () => {
+      resetAutoScroll();
+      slider.scrollBy({ left: 300, behavior: 'smooth' });
+    });
+    
+    // Défilement automatique
+    function startAutoScroll() {
+      autoScrollInterval = setInterval(() => {
+        if (slider.scrollLeft + slider.clientWidth >= slider.scrollWidth - 10) {
+          slider.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          slider.scrollBy({ left: 300, behavior: 'smooth' });
+        }
+      }, 3000);
+    }
+    
+    function resetAutoScroll() {
+      clearInterval(autoScrollInterval);
+      startAutoScroll();
+    }
+    
+    // Pause au survol
+    slider.addEventListener('mouseenter', () => {
+      clearInterval(autoScrollInterval);
+    });
+    
+    slider.addEventListener('mouseleave', startAutoScroll);
+    
+    // Charger les produits
+    loadProducts();
+  });
+</script>

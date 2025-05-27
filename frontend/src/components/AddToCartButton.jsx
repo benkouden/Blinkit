@@ -90,14 +90,14 @@ const decreaseQty = async(e) => {
             {
                 isAvailableCart ? (
                     <div className='flex w-full h-full'>
-                        <button onClick={decreaseQty}  className='bg-green-600 hover:bg-green-700 text-white flex-1 w-full p-1 rounded flex items-center justify-center'><FaMinus /></button>
+                        <button onClick={decreaseQty}  className='flex items-center justify-center flex-1 w-full p-1 text-white bg-green-600 rounded hover:bg-green-700'><FaMinus /></button>
 
-                        <p className='flex-1 w-full font-semibold px-1 flex items-center justify-center'>{qty}</p>
+                        <p className='flex items-center justify-center flex-1 w-full px-1 font-semibold'>{qty}</p>
 
-                        <button onClick={increaseQty}  className='bg-green-600 hover:bg-green-700 text-white flex-1 w-full p-1 rounded flex items-center justify-center'><FaPlus /></button>
+                        <button onClick={increaseQty}  className='flex items-center justify-center flex-1 w-full p-1 text-white bg-green-600 rounded hover:bg-green-700'><FaPlus /></button>
                     </div>
                 ) : (
-                    <button onClick={handleADDToCart} className='bg-green-600 hover:bg-green-700 text-white px-2 lg:px-4 py-1 rounded'>
+                    <button onClick={handleADDToCart} className='px-2 py-1 text-white bg-green-600 rounded hover:bg-green-700 lg:px-4'>
                         {loading ? <Loading /> : "Add"}
                     </button>
                 )
